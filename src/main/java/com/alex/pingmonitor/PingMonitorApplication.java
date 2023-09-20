@@ -1,11 +1,18 @@
 package com.alex.pingmonitor;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.InetSocketAddress;
@@ -28,6 +35,10 @@ public class PingMonitorApplication implements ApplicationRunner {
 	public void run(ApplicationArguments arg0) throws Exception {
 		ds = (new DataSourceConfig()).getDataSource();
 		while (true) {
+
+			HttpResponse rsp = getHttpResponse("http://echo.jsontest.com/title/ipsum/content/blah");
+			logHighlight("repsonse code: " +  rsp.getStatusLine() + " - " + EntityUtils.toString(rsp.getEntity()) );
+
 			BigDecimal responseTimeDecimal = new BigDecimal(runPing());
 			insertPingHoury(responseTimeDecimal.movePointLeft(6));
 			Thread.sleep(5000);
@@ -117,6 +128,26 @@ public class PingMonitorApplication implements ApplicationRunner {
 		}
 	}
 
+	public HttpResponse getHttpResponse(String url) {
+		HttpClient httpClient = HttpClients.createDefault();
+		HttpGet request = new HttpGet(url);
+		//HttpGet request = new HttpGet("https://httpbin.org/get");
+
+		try {
+			HttpResponse response = httpClient.execute(request);
+			return response;
+			//httpclient.executeMethod(httpget);
+			//System.out.println(httpget.getStatusLine());
+		} catch (ClientProtocolException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+			request.releaseConnection();
+		}
+
+	}
+
 	public static String getTimestampString() {
 		String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date());
 		return "[" + timeStamp + "]";
@@ -127,10 +158,18 @@ public class PingMonitorApplication implements ApplicationRunner {
 	}
 
 
+
+
 	public static void logError(String s) {
 		final String ANSI_RED = "\u001B[31m";
 		final String ANSI_RESET = "\u001B[0m";
 		System.out.println(ANSI_RED + getTimestampString() + " " + s + ANSI_RESET);
+	}
+
+	public static void logHighlight(String s) {
+		final String ANSI_CYAN = "\u001B[36m";
+		final String ANSI_RESET = "\u001B[0m";
+		System.out.println(ANSI_CYAN + getTimestampString() + " " + s + ANSI_RESET);
 	}
 
 }
