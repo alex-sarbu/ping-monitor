@@ -14,6 +14,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import de.vandermeer.asciitable.AsciiTable;
 
 @Path("/ping-monitor")
 public class PingMonitorService {
@@ -111,6 +112,15 @@ public class PingMonitorService {
             htmlBuilder.addRowValues(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(run.ts.getTime()), new DecimalFormat("#0.######").format(run.avgResponse), Integer.toString(run.cntUnreachable));
         }
         return htmlBuilder.build();
+
+        //AsciiTable at = new AsciiTable();
+        //at.addRule();
+        //at.addRow("Timestamp", "Avg Response", "Unreachable");
+        //for (PingHourlyRun run : runs) {
+        //    at.addRow(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(run.ts.getTime()), new DecimalFormat("#0.######").format(run.avgResponse), run.cntUnreachable);
+        //}
+        //at.addRule();
+        //return at.render();
 
     }
 }
