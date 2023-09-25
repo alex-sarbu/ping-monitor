@@ -73,6 +73,7 @@ public class PingMonitorApplication implements ApplicationRunner {
 			} else {
 				int cntUnreachable = lastRun.cntUnreachable + 1;
 				sql = "update ping_hourly set cnt = " + cnt + ", cnt_unreachable = " + cntUnreachable + " where id = " + lastRun.id;
+				insertUnreachable();
 			}
 		}
 
@@ -85,6 +86,20 @@ public class PingMonitorApplication implements ApplicationRunner {
 			logInfo("insert successful, returned " + rs);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	public static Boolean insertUnreachable() {
+		String sql = "insert into log_unreachable (text) values ('unreachable')";
+
+		try (var connection = ds.getConnection();
+			 var stmt = connection.createStatement();
+		) {
+			int rs = stmt.executeUpdate(sql);
+			return rs == 1;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 
